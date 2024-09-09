@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marwadi StudySpace</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <script
+      src="https://kit.fontawesome.com/a076d05399.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      .sidebar {
+        background-color: rgb(255, 255, 255); /* White background color */
+        height: 100vh; /* Full height */
+        width: 500px; /* Fixed width */
+        padding: 20px;
+        padding-left: 30px; /* Adjusted padding */
+      }
+      .sidebar .nav-link {
+        font-size: 18px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+      }
+      .sidebar .nav-link i {
+        margin-right: 10px;
+        font-size: 20px;
+      }
+      .sidebar .nav-link:hover {
+        background-color: #cccdd1; /* Slightly darker white on hover */
+        border-radius: 5px;
+        color: black;
+      }
+      .content {
+        padding: 20px;
+      }
+
+      .sidebar .nav-link.active {
+  background-color: #b0b3bd; /* Background color for active link */
+  border-radius: 5px;
+  color: black; /* Text color for active link */
+}
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar fixed-top" style="background-color: white;"  >
+      <div class="container-fluid">
+        <a class="navbar-brand ms-3" href="Dashboard.html">
+          <img
+            src="imgs/logo black.png"
+            alt=""
+            style="height: 90px; width: 300px"
+          />
+        </a>
+        <div class="d-flex ms-auto me-3">
+          <form class="d-flex" role="search">
+            <input
+              class="form-control"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              style="height: 30px; width: 700px; border-radius: 10px; margin-top: 12px;"
+            />
+          </form>
+          <!-- login -->
+          <a href="login.html" class="nav-link me-2">
+            <i
+              class="bi bi-box-arrow-in-right"
+              style="font-size: 24px; font-weight: bold; color: black"
+            ></i>
+          </a>
+
+          <a href="#" class="nav-link me-2">
+            <i
+              class="bi bi-inbox"
+              style="font-size: 24px; font-weight: bold; color: black"
+            ></i>
+          </a>
+          <a href="communities.html" class="nav-link me-2">
+            <i
+              class="bi bi-person-lines-fill"
+              style="font-size: 24px; font-weight: bold; color: black"
+            ></i>
+          </a>
+          <a href="help.html" class="nav-link">
+            <i
+              class="bi bi-question-circle-fill"
+              style="font-size: 24px; font-weight: bold; color: black"
+            ></i>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <section class="d-flex justify-content-center justify-content-lg-between p-4 border-bottom" style="margin-top: 68px;">
+      <!-- Left -->
+      <!-- <div class="me-5 d-none d-lg-block">
+        <span><center>Get connected with us</center></span>
+      </div> -->
+      <!-- Left -->
+
+      <!-- Right -->
+    </section>
+    
+
+    <!-- Main Layout -->
+    <div class="container-fluid" >
+      <div class="row">
+        <!-- Sidebar -->
+        <nav class="sidebar col-md-2 d-md-block " style="border-right:solid 1px #dedede;">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="Dashboard.html">
+                <i class="bi bi-house-door-fill"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="ques.html">
+                <i class="bi bi-chat-left-text-fill"></i> Questions
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="tags.html">
+                <i class="bi bi-tags-fill"></i> Tags
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="bookmarks.html">
+                <i class="bi bi-bookmark-star"></i> Bookmarks
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="users.html">
+                <i class="bi bi-people-fill"></i> Users
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="communities.html">
+                <i class="bi bi-person-lines-fill"></i> Communities
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="col-md-10 ms-sm-auto px-4 content">
+          <!-- Your content goes here -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Top Questions</h3>
+            <button style="color: white; background-color: #1572e8; border: none; padding: 10px 20px; font-size: 14px; border-radius: 25px; cursor: pointer;">Ask Question</button>
+          </div>
+
+          <!-- Menu Bar -->
+          <div class="container mt-3">
+            <ul class="nav nav-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" href="#">Most Asked Questions</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Most Liked Questions</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Today</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">This Week</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">This Month</a>
+              </li>
+            </ul>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-lg-start bg-body-tertiary text-muted">
+      <!-- Section: Social media -->
+      <section class="d-flex justify-content-center justify-content-lg-between p-4 border-bottom">
+        <!-- Left -->
+        <!-- <div class="me-5 d-none d-lg-block">
+          <span><center>Get connected with us</center></span>
+        </div> -->
+        <!-- Left -->
+
+        <!-- Right -->
+      </section>
+      <!-- Section: Social media -->
+
+      <!-- Section: Links  -->
+      <section class="">
+        <div class="container text-center text-md-start mt-5">
+          <!-- Grid row -->
+          <div class="row mt-3">
+            <!-- Grid column -->
+            <div class="col-md-3 col-lg-4 col-xl-3 mx-auto mb-4">
+              <!-- Content -->
+              <h6 class="text-uppercase fw-bold mb-4">
+                <i class="fas fa-gem me-3"></i><img src="imgs/logo black.png" style="height: 90px; width: 300px" alt="Marwadi StudySpace logo" title="Marwadi StudySpace logo">
+              </h6>
+              <p>
+                Your go-to platform for academic support and community engagement.
+              </p>
+            </div>
+            <!-- Grid column -->
+
+            <!-- Grid column -->
+            <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+              <!-- Links -->
+              <h6 class="text-uppercase fw-bold mb-4">
+                Products
+              </h6>
+              <p>
+                <a href="#!" class="text-reset">Team</a>
+              </p>
+              <p>
+                <a href="#!" class="text-reset">About</a>
+              </p>
+            </div>
+            <!-- Grid column -->
+
+            <!-- Grid column -->
+            <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+              <!-- Links -->
+              <h6 class="text-uppercase fw-bold mb-4">
+                Useful links
+              </h6>
+              <p>
+                <a href="" class="text-reset">E-Mail</a>
+              </p>
+              <p>
+                <a href="https://www.instagram.com/marwadi.university/?hl=en" class="text-reset">Instagram</a>
+              </p>
+              <p>
+                <a href="https://www.linkedin.com/in/marwadieducation/?originalSubdomain=in" class="text-reset">LinkedIn</a>
+              </p>
+              <p>
+                <a href="#!" class="text-reset">Help</a>
+              </p>
+            </div>
+            <!-- Grid column -->
+
+            <!-- Grid column -->
+            <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+              <!-- Links -->
+              <h6 class="text-uppercase fw-bold mb-4">Contact</h6>
+              <p>Marwadi University</p>
+              <p>
+                <i class="fas fa-envelope me-3"></i>
+                Rajkot-Morbi Road, Rajkot(360 003)<br> Gujarat, India
+              </p>
+            </div>
+            <!-- Grid column -->
+          </div>
+          <!-- Grid row -->
+        </div>
+      </section>
+      <!-- Section: Links  -->
+
+      <!-- Copyright -->
+      <div class="text-center p-4" style="background-color: rgba(0, 0, 0, 0.05);">
+        © 2024 Copyright:
+        <a class="text-reset fw-bold" href="https://mdbootstrap.com/">Marwadi StudySpace</a>
+      </div>
+      <!-- Copyright -->
+    </footer>
+    <!-- Footer -->
+  </body>
+</html>
