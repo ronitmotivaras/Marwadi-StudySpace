@@ -320,7 +320,7 @@ include 'header.php';
             <?php endif; ?>
 
             <div class="page-header">
-                <button class="add-question-btn" onclick="openAddQuestionModal()">➕ Add Question</button>
+                <button class="add-question-btn" onclick="openAddQuestionModal()">+ Add Question</button>
             </div>
 
             <div class="doubts-grid">

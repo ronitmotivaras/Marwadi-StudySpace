@@ -18,6 +18,11 @@ $sql = "SELECT d.* FROM `doubts` d
         ORDER BY b.bookmark_id DESC";
 $bookmarks_result = mysqli_query($conn, $sql);
 
+// Check if query failed
+if (!$bookmarks_result) {
+    die("Database query failed: " . mysqli_error($conn));
+}
+
 include 'header.php'; 
 ?>
 
@@ -73,8 +78,9 @@ include 'header.php';
     }
 
     .main-content {
-        padding: 40px 30px;
+        padding: 30px;
         max-width: 1200px;
+        width: 100%;
         margin: 0 auto;
         min-height: calc(100vh - 80px);
         flex: 1;
@@ -97,28 +103,26 @@ include 'header.php';
         text-decoration: none;
     }
 
-    .back-button:hover {
-        background: #5a6268;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
-    }
+    
 
     .page-title {
-        font-size: 32px;
+        font-size: 28px;
         color: #333;
         margin-bottom: 30px;
+        font-weight: 600;
     }
 
     .bookmarks-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        display: flex;
+        flex-direction: column;
         gap: 20px;
+        margin-top: 20px;
     }
 
     .bookmark-box {
-        background: #f8f9fa;
+        background: #f8f9fb;
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 15px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
@@ -142,7 +146,7 @@ include 'header.php';
         font-size: 14px;
         line-height: 1.6;
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -150,8 +154,9 @@ include 'header.php';
     .empty-state {
         text-align: center;
         padding: 60px 20px;
-        color: #999;
-        grid-column: 1 / -1;
+        background: #f8f9fb;
+        border-radius: 15px;
+        border: 2px dashed #ddd;
     }
 
     .empty-state h2 {
@@ -162,6 +167,7 @@ include 'header.php';
 
     .empty-state p {
         font-size: 16px;
+        color: #999;
     }
 
     @media (max-width: 768px) {
@@ -177,8 +183,12 @@ include 'header.php';
             font-size: 24px;
         }
 
-        .bookmarks-grid {
-            grid-template-columns: 1fr;
+        .bookmark-box h3 {
+            font-size: 16px;
+        }
+
+        .bookmark-box p {
+            font-size: 13px;
         }
     }
 </style>
@@ -193,7 +203,6 @@ include 'header.php';
 
     <div class="content-wrapper">
         <div class="main-content">
-            <a href="Dashboard.php" class="back-button">← Back</a>
             
             <h1 class="page-title">My Bookmarks</h1>
             
@@ -207,7 +216,7 @@ include 'header.php';
                     <?php endwhile; ?>
                 <?php else: ?>
                     <div class="empty-state">
-                        <h2>No bookmarks yet</h2>
+                        <h2>📚 No bookmarks yet</h2>
                         <p>Bookmark questions you find helpful to access them later</p>
                     </div>
                 <?php endif; ?>

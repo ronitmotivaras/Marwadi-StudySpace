@@ -12,17 +12,35 @@ include "config/_dbconnect.php";
 $user_id = $_SESSION['user_id'];
 $doubt_id = isset($_GET['id']) ? intval($_GET['id']) : 1;
 
+// Fetch question details first to check ownership
+$doubt_sql = "SELECT * FROM `doubts` WHERE doubt_id = '$doubt_id'";
+$doubt_result = mysqli_query($conn, $doubt_sql);
+
+if (!$doubt_result || mysqli_num_rows($doubt_result) == 0) {
+    echo "Question not found. Redirecting...";
+    header("refresh:2;url=Dashboard.php");
+    exit;
+}
+
+$doubt = mysqli_fetch_assoc($doubt_result);
+$is_question_owner = ($doubt['user_id'] == $user_id);
+
 // Handle answer submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     if ($_POST['action'] == 'add_answer') {
-        $answer = mysqli_real_escape_string($conn, $_POST['answer']);
-        
-        $sql = "INSERT INTO `answer` (doubt_id, user_id, answer) VALUES ('$doubt_id', '$user_id', '$answer')";
-        
-        if (mysqli_query($conn, $sql)) {
-            $success = "Answer added successfully";
+        // Check if user is not the question owner
+        if ($is_question_owner) {
+            $error = "You cannot answer your own question";
         } else {
-            $error = "Failed to add answer: " . mysqli_error($conn);
+            $answer = mysqli_real_escape_string($conn, $_POST['answer']);
+            
+            $sql = "INSERT INTO `answer` (doubt_id, user_id, answer) VALUES ('$doubt_id', '$user_id', '$answer')";
+            
+            if (mysqli_query($conn, $sql)) {
+                $success = "Answer added successfully";
+            } else {
+                $error = "Failed to add answer: " . mysqli_error($conn);
+            }
         }
     }
     
@@ -55,18 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         }
     }
 }
-
-// Fetch question details
-$doubt_sql = "SELECT * FROM `doubts` WHERE doubt_id = '$doubt_id'";
-$doubt_result = mysqli_query($conn, $doubt_sql);
-
-if (!$doubt_result || mysqli_num_rows($doubt_result) == 0) {
-    echo "Question not found. Redirecting...";
-    header("refresh:2;url=Dashboard.php");
-    exit;
-}
-
-$doubt = mysqli_fetch_assoc($doubt_result);
 
 // Check if question is bookmarked
 $bookmark_check = "SELECT * FROM `bookmarks` WHERE user_id = '$user_id' AND doubt_id = '$doubt_id'";
@@ -137,11 +143,11 @@ include 'header.php';
     }
 
     .main-content {
-        padding: 40px 30px;
-        max-width: 900px;
+        padding: 30px;
+        max-width: 1000px;
+        width: 100%;
         margin: 0 auto;
         min-height: calc(100vh - 80px);
-        flex: 1;
     }
 
     .back-button {
@@ -186,44 +192,55 @@ include 'header.php';
         border: 1px solid #f5c6cb;
     }
 
+    .alert-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
     .doubt-section {
         background: #f8f9fb;
         color: #333;
-        padding: 25px;
-        border-radius: 10px;
-        margin-bottom: 25px;
-        position: relative;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
         border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .doubt-title {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 600;
         line-height: 1.4;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        word-wrap: break-word;
     }
 
     .doubt-description {
         font-size: 16px;
-        line-height: 1.6;
-        color: #666;
-        margin-bottom: 20px;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 25px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
 
     .doubt-actions {
         display: flex;
         gap: 15px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .bookmark-btn {
         background: #f39c12;
         border: none;
         color: #ffffff;
-        padding: 10px 20px;
+        padding: 11px 22px;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 500;
         transition: all 0.3s ease;
         white-space: nowrap;
@@ -264,12 +281,20 @@ include 'header.php';
         box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
     }
 
+    .add-answer-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        opacity: 0.6;
+    }
+
     .add-answer-form {
         background: #f8f9fa;
         padding: 25px;
         border-radius: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
         display: none;
+        border: 1px solid #e0e0e0;
     }
 
     .add-answer-form.show {
@@ -340,14 +365,14 @@ include 'header.php';
         display: flex;
         flex-direction: column;
         gap: 20px;
-        margin-bottom: 20px;
     }
 
     .answer-section {
-        background: #f8f9fa;
+        background: #ffffff;
         padding: 25px;
         border-radius: 10px;
-        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .answer-header {
@@ -359,7 +384,7 @@ include 'header.php';
 
     .answer-section h3 {
         color: #333;
-        font-size: 20px;
+        font-size: 18px;
         margin-bottom: 0;
     }
 
@@ -367,21 +392,22 @@ include 'header.php';
         color: #4a90e2;
         font-size: 14px;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
     .answer-content {
-        color: #666;
-        font-size: 16px;
+        color: #555;
+        font-size: 15px;
         line-height: 1.8;
         margin-bottom: 15px;
         white-space: pre-wrap;
+        word-wrap: break-word;
     }
 
     .comment-section {
         margin-top: 20px;
         padding-top: 20px;
-        border-top: 2px solid #e0e0e0;
+        border-top: 2px solid #e9ecef;
     }
 
     .comment-form {
@@ -424,16 +450,15 @@ include 'header.php';
     .comments-list {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
     }
 
     .comment-item {
-        background: #ffffff;
-        padding: 15px 15px 15px 30px;
+        background: #f8f9fa;
+        padding: 15px 15px 15px 25px;
         border-radius: 8px;
         border-left: 3px solid #4a90e2;
-        margin-left: 20px;
-        margin-bottom: 10px;
+        margin-left: 15px;
     }
 
     .comment-header {
@@ -445,7 +470,7 @@ include 'header.php';
 
     .comment-user {
         color: #4a90e2;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
     }
 
@@ -453,7 +478,7 @@ include 'header.php';
         color: #555;
         font-size: 14px;
         line-height: 1.6;
-        margin-bottom: 10px;
+        word-wrap: break-word;
     }
 
     @media (max-width: 768px) {
@@ -462,11 +487,15 @@ include 'header.php';
         }
 
         .main-content {
-            padding: 20px;
+            padding: 20px 15px;
         }
 
         .doubt-title {
-            font-size: 20px;
+            font-size: 22px;
+        }
+
+        .doubt-description {
+            font-size: 15px;
         }
 
         .doubt-actions {
@@ -477,6 +506,7 @@ include 'header.php';
         .add-answer-btn,
         .bookmark-btn {
             width: 100%;
+            justify-content: center;
         }
     }
 </style>
@@ -503,11 +533,18 @@ include 'header.php';
 
             <div class="doubt-section">
                 <div class="doubt-title"><?php echo htmlspecialchars($doubt['title']); ?></div>
-                <div class="doubt-description"><?php echo htmlspecialchars($doubt['description']); ?></div>
+                <div class="doubt-description"><?php echo nl2br(htmlspecialchars($doubt['description'])); ?></div>
                 <div class="doubt-actions">
-                    <button class="add-answer-btn" onclick="showAnswerForm()">
-                        ➕ Add Answer
-                    </button>
+                    <?php if (!$is_question_owner): ?>
+                        <button class="add-answer-btn" onclick="showAnswerForm()">
+                            ➕ Add Answer
+                        </button>
+                    <?php else: ?>
+                        <button class="add-answer-btn" disabled title="You cannot answer your own question">
+                            🚫 Cannot Answer Own Question
+                        </button>
+                    <?php endif; ?>
+                    
                     <form method="POST" action="" id="bookmarkForm" style="display: inline;">
                         <input type="hidden" name="action" value="toggle_bookmark">
                         <button type="submit" class="bookmark-btn <?php echo $is_bookmarked ? 'bookmarked' : ''; ?>" id="bookmarkBtn">
@@ -517,6 +554,7 @@ include 'header.php';
                 </div>
             </div>
 
+            <?php if (!$is_question_owner): ?>
             <form method="POST" action="" id="addAnswerForm" class="add-answer-form">
                 <h3>Your Answer</h3>
                 <input type="hidden" name="action" value="add_answer">
@@ -526,6 +564,7 @@ include 'header.php';
                     <button type="button" class="cancel-answer-btn" onclick="hideAnswerForm()">Cancel</button>
                 </div>
             </form>
+            <?php endif; ?>
 
             <div class="answers-container">
                 <?php 
@@ -561,7 +600,7 @@ include 'header.php';
                                 <div class="comment-header">
                                     <div class="comment-user"><?php echo htmlspecialchars($comment['user_name']); ?></div>
                                 </div>
-                                <div class="comment-content"><?php echo htmlspecialchars($comment['comment']); ?></div>
+                                <div class="comment-content"><?php echo nl2br(htmlspecialchars($comment['comment'])); ?></div>
                             </div>
                             <?php endwhile; ?>
                         </div>
@@ -573,7 +612,7 @@ include 'header.php';
                 else:
                 ?>
                 <div class="answer-section">
-                    <p style="text-align: center; color: #666;">No answers yet. Be the first to answer!</p>
+                    <p style="text-align: center; color: #666; padding: 20px;">No answers yet. Be the first to answer!</p>
                 </div>
                 <?php endif; ?>
             </div>

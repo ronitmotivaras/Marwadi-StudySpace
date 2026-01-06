@@ -1,4 +1,32 @@
-<?php include 'header.php'; ?>
+<?php 
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: user_login.php");
+    exit;
+}
+
+include "config/_dbconnect.php";
+
+$user_id = $_SESSION['user_id'];
+
+// Fetch user details from database
+$sql = "SELECT user_id, en_num, name, email FROM `user` WHERE user_id = '$user_id'";
+$result = mysqli_query($conn, $sql);
+
+if (!$result || mysqli_num_rows($result) == 0) {
+    echo "User not found!";
+    exit;
+}
+
+$user = mysqli_fetch_assoc($result);
+
+// Get first letter of name for avatar
+$first_letter = strtoupper(substr($user['name'], 0, 1));
+
+include 'header.php'; 
+?>
 
 <style>
     .main-layout {
@@ -54,38 +82,65 @@
     .main-content {
         padding: 30px;
         max-width: 1200px;
+        width: 100%;
         margin: 0 auto;
         min-height: calc(100vh - 80px);
-        flex: 1;
-        display: flex;
+    }
+
+    .back-button {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 30px;
+        display: inline-flex;
         align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .back-button:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .profile-wrapper {
+        display: flex;
         justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 220px);
     }
 
     .profile-container {
         width: 100%;
-        max-width: 900px;
+        max-width: 650px;
         background: #ffffff;
         border-radius: 20px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        padding: 50px 60px;
+        padding: 45px 55px;
         text-align: center;
     }
 
     .profile-avatar {
-        width: 120px;
-        height: 120px;
+        width: 110px;
+        height: 110px;
         border-radius: 50%;
         background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 50px;
+        font-size: 48px;
         font-weight: 600;
-        margin: 0 auto 25px;
+        margin: 0 auto 20px;
         border: 4px solid #f0f0f0;
-        box-shadow: 0 4px 20px rgba(74, 144, 226, 0.3);
+        box-shadow: 0 6px 25px rgba(74, 144, 226, 0.3);
     }
 
     .profile-name {
@@ -99,8 +154,8 @@
     .profile-info {
         background: #f8f9fb;
         border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 30px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
     }
 
     .info-item {
@@ -122,7 +177,7 @@
 
     .info-label {
         color: #6b7280;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 14px;
         text-align: left;
     }
@@ -132,22 +187,23 @@
         font-weight: 600;
         font-size: 15px;
         text-align: right;
+        word-break: break-all;
     }
 
     .logout-button-container {
         text-align: left;
-        margin-top: 30px;
+        margin-top: 25px;
     }
 
     .logout-button {
         display: inline-block;
-        padding: 14px 35px;
+        padding: 12px 32px;
         background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
         text-decoration: none;
         border-radius: 10px;
         font-weight: 600;
-        font-size: 16px;
+        font-size: 15px;
         transition: all 0.3s ease;
         border: none;
         cursor: pointer;
@@ -170,27 +226,37 @@
         }
 
         .profile-container {
-            padding: 40px 25px;
+            padding: 35px 25px;
         }
 
         .profile-avatar {
-            width: 100px;
-            height: 100px;
-            font-size: 42px;
+            width: 90px;
+            height: 90px;
+            font-size: 40px;
         }
 
         .profile-name {
             font-size: 24px;
         }
 
+        .profile-info {
+            padding: 20px;
+        }
+
         .info-item {
             flex-direction: column;
             align-items: flex-start;
-            gap: 5px;
+            gap: 8px;
+            padding: 12px 0;
         }
 
         .info-value {
             text-align: left;
+            font-size: 14px;
+        }
+
+        .info-label {
+            font-size: 13px;
         }
     }
 </style>
@@ -205,31 +271,27 @@
 
     <div class="content-wrapper">
         <div class="main-content">
-            <div class="profile-container">
-                <div class="profile-avatar">U</div>
-                <h1 class="profile-name">User Name</h1>
-                
-                <div class="profile-info">
-                    <div class="info-item">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">user@example.com</div>
+            <a href="Dashboard.php" class="back-button">← Back</a>
+            
+            <div class="profile-wrapper">
+                <div class="profile-container">
+                    <div class="profile-avatar"><?php echo $first_letter; ?></div>
+                    <h1 class="profile-name"><?php echo htmlspecialchars($user['name']); ?></h1>
+                    
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <div class="info-label">Enrollment Number</div>
+                            <div class="info-value"><?php echo htmlspecialchars($user['en_num']); ?></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email</div>
+                            <div class="info-value"><?php echo htmlspecialchars($user['email']); ?></div>
+                        </div>
                     </div>
-                    <div class="info-item">
-                        <div class="info-label">User ID</div>
-                        <div class="info-value">MU12345678</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Department</div>
-                        <div class="info-value">Computer Science</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Semester</div>
-                        <div class="info-value">5th Semester</div>
-                    </div>
-                </div>
 
-                <div class="logout-button-container">
-                    <a href="index.php" class="logout-button">Logout</a>
+                    <div class="logout-button-container">
+                        <a href="logout.php" class="logout-button">Logout</a>
+                    </div>
                 </div>
             </div>
         </div>
