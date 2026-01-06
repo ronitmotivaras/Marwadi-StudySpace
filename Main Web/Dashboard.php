@@ -1,4 +1,38 @@
-<?php include 'header.php'; ?>
+<?php 
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: user_login.php");
+    exit;
+}
+
+include "config/_dbconnect.php";
+
+$user_id = $_SESSION['user_id'];
+
+// Handle add question submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
+    if ($_POST['action'] == 'add_question') {
+        $title = mysqli_real_escape_string($conn, $_POST['title']);
+        $description = mysqli_real_escape_string($conn, $_POST['description']);
+        
+        $sql = "INSERT INTO `doubts` (user_id, title, description) VALUES ('$user_id', '$title', '$description')";
+        
+        if (mysqli_query($conn, $sql)) {
+            $success = "Question added successfully";
+        } else {
+            $error = "Failed to add question: " . mysqli_error($conn);
+        }
+    }
+}
+
+// Fetch all questions from database
+$sql = "SELECT * FROM `doubts` ORDER BY doubt_id DESC";
+$doubts_result = mysqli_query($conn, $sql);
+
+include 'header.php'; 
+?>
 
 <style>
     .main-layout {
@@ -57,6 +91,51 @@
         margin: 0 auto;
         min-height: calc(100vh - 80px);
         flex: 1;
+        width: 100%;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .add-question-btn {
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .add-question-btn:hover {
+        background: linear-gradient(135deg, #357abd 0%, #2a5f8f 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    }
+
+    .alert {
+        padding: 12px 20px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
     }
 
     .doubts-grid {
@@ -74,20 +153,11 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
         border-left: 4px solid #4a90e2;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
     }
 
     .doubt-box:hover {
         transform: translateY(-5px);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    .doubt-content {
-        flex: 1;
-        min-width: 0;
     }
 
     .doubt-box h3 {
@@ -107,32 +177,111 @@
         overflow: hidden;
     }
 
-    .doubt-stats {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 8px;
-        min-width: 120px;
-        padding-left: 20px;
-        border-left: 1px solid #e0e0e0;
-    }
-
-    .stat-item {
-        display: flex;
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
         align-items: center;
-        gap: 6px;
-        color: #666;
-        font-size: 14px;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        color: #333;
+        font-size: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
         font-weight: 500;
+        font-size: 14px;
     }
 
-    .stat-item span {
-        color: #4a90e2;
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
         font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
 
-    .stat-icon {
-        font-size: 16px;
+    .btn-primary {
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #357abd 0%, #2a5f8f 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .btn-secondary:hover {
+        background: #d0d0d0;
     }
 
     @media (max-width: 768px) {
@@ -144,19 +293,10 @@
             padding: 20px;
         }
 
-        .doubt-box {
+        .page-header {
             flex-direction: column;
             align-items: flex-start;
-        }
-
-        .doubt-stats {
-            flex-direction: row;
-            justify-content: space-around;
-            width: 100%;
-            padding-left: 0;
-            padding-top: 15px;
-            border-left: none;
-            border-top: 1px solid #e0e0e0;
+            gap: 15px;
         }
     }
 </style>
@@ -171,119 +311,77 @@
 
     <div class="content-wrapper">
         <div class="main-content">
+            <?php if (isset($success)): ?>
+                <div class="alert alert-success"><?php echo $success; ?></div>
+            <?php endif; ?>
+            
+            <?php if (isset($error)): ?>
+                <div class="alert alert-error"><?php echo $error; ?></div>
+            <?php endif; ?>
+
+            <div class="page-header">
+                <button class="add-question-btn" onclick="openAddQuestionModal()">➕ Add Question</button>
+            </div>
+
             <div class="doubts-grid">
-                <div class="doubt-box" onclick="window.location.href='chats.php?id=1'">
-                    <div class="doubt-content">
-                        <h3>What is the difference between SQL and NoSQL databases?</h3>
-                        <p>I'm learning about databases and I'm confused about when to use SQL vs NoSQL. Can someone explain the key differences and use cases?</p>
-                    </div>
-                    <div class="doubt-stats">
-                        <div class="stat-item">
-                            <span class="stat-icon">👁️</span>
-                            <span>27</span>
-                            <span>views</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">💬</span>
-                            <span>4</span>
-                            <span>answers</span>
-                        </div>
-                    </div>
+                <?php while ($doubt = mysqli_fetch_assoc($doubts_result)): ?>
+                <div class="doubt-box" onclick="window.location.href='chats.php?id=<?php echo $doubt['doubt_id']; ?>'">
+                    <h3><?php echo htmlspecialchars($doubt['title']); ?></h3>
+                    <p><?php echo htmlspecialchars($doubt['description']); ?></p>
                 </div>
-                <div class="doubt-box" onclick="window.location.href='chats.php?id=2'">
-                    <div class="doubt-content">
-                        <h3>How does JavaScript closure work?</h3>
-                        <p>I'm having trouble understanding closures in JavaScript. Can someone provide a simple example and explanation?</p>
-                    </div>
-                    <div class="doubt-stats">
-                        <div class="stat-item">
-                            <span class="stat-icon">👁️</span>
-                            <span>16</span>
-                            <span>views</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">💬</span>
-                            <span>2</span>
-                            <span>answers</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="doubt-box" onclick="window.location.href='chats.php?id=3'">
-                    <div class="doubt-content">
-                        <h3>What is the time complexity of quicksort algorithm?</h3>
-                        <p>I need to understand the time complexity analysis of quicksort. What is the best case, average case, and worst case scenario?</p>
-                    </div>
-                    <div class="doubt-stats">
-                        <div class="stat-item">
-                            <span class="stat-icon">👁️</span>
-                            <span>44</span>
-                            <span>views</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">💬</span>
-                            <span>1</span>
-                            <span>answers</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="doubt-box" onclick="window.location.href='chats.php?id=4'">
-                    <div class="doubt-content">
-                        <h3>How to implement authentication in PHP?</h3>
-                        <p>I'm building a web application and need to implement user authentication. What are the best practices for secure login in PHP?</p>
-                    </div>
-                    <div class="doubt-stats">
-                        <div class="stat-item">
-                            <span class="stat-icon">👁️</span>
-                            <span>50k</span>
-                            <span>views</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">💬</span>
-                            <span>5</span>
-                            <span>answers</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="doubt-box" onclick="window.location.href='chats.php?id=5'">
-                    <div class="doubt-content">
-                        <h3>What is REST API and how does it work?</h3>
-                        <p>Can someone explain REST API concepts, HTTP methods, and how to design a RESTful API?</p>
-                    </div>
-                    <div class="doubt-stats">
-                        <div class="stat-item">
-                            <span class="stat-icon">👁️</span>
-                            <span>32</span>
-                            <span>views</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">💬</span>
-                            <span>3</span>
-                            <span>answers</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="doubt-box" onclick="window.location.href='chats.php?id=6'">
-                    <div class="doubt-content">
-                        <h3>Difference between let, const, and var in JavaScript?</h3>
-                        <p>I'm confused about variable declarations in JavaScript. What are the differences between let, const, and var?</p>
-                    </div>
-                    <div class="doubt-stats">
-                        <div class="stat-item">
-                            <span class="stat-icon">👁️</span>
-                            <span>28</span>
-                            <span>views</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">💬</span>
-                            <span>2</span>
-                            <span>answers</span>
-                        </div>
-                    </div>
-                </div>
+                <?php endwhile; ?>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Add Question Modal -->
+<div class="modal" id="questionModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Question</h2>
+        </div>
+        <form method="POST" action="Dashboard.php">
+            <input type="hidden" name="action" value="add_question">
+            
+            <div class="form-group">
+                <label for="questionTitle">Title</label>
+                <input type="text" id="questionTitle" name="title" placeholder="Enter your question title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="questionDescription">Description</label>
+                <textarea id="questionDescription" name="description" placeholder="Describe your question in detail..." required></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-secondary" onclick="closeQuestionModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Question</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddQuestionModal() {
+        document.getElementById('questionModal').classList.add('show');
+        document.getElementById('questionTitle').focus();
+    }
+
+    function closeQuestionModal() {
+        document.getElementById('questionModal').classList.remove('show');
+        document.getElementById('questionTitle').value = '';
+        document.getElementById('questionDescription').value = '';
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('questionModal');
+        if (event.target === modal) {
+            closeQuestionModal();
+        }
+    });
+</script>
 
 </body>
 </html>

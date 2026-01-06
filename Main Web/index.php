@@ -1,3 +1,47 @@
+<?php
+session_start();
+$showerror = false;
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    include "config/_dbconnect.php";
+    
+    $enrollment = $_POST['enrollment'];
+    $password = $_POST['password'];
+    
+    // Query to get user by enrollment number
+    $sql = "SELECT * FROM `user` WHERE en_num = '$enrollment'";
+    $result = mysqli_query($conn, $sql);
+    
+    if ($result) {
+        $num = mysqli_num_rows($result);
+        
+        if ($num == 1) {
+            $row = mysqli_fetch_assoc($result);
+            
+            // Verify password using password_verify for hashed passwords
+            if (password_verify($password, $row['pass'])) {
+                // Login successful
+                $_SESSION['loggedin'] = true;
+                $_SESSION['user_id'] = $row['user_id'];
+                $_SESSION['en_num'] = $row['en_num'];
+                $_SESSION['name'] = $row['name'];
+                $_SESSION['email'] = $row['email'];
+                
+                header("Location: Dashboard.php");
+                exit;
+            } else {
+                $showerror = "Wrong credentials";
+            }
+        } else {
+            $showerror = "Wrong credentials";
+        }
+    } else {
+        $showerror = "Database error";
+    }
+    
+    mysqli_close($conn);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,6 +124,25 @@
             letter-spacing: 0.5px;
         }
 
+        .error-alert {
+            background: rgba(231, 76, 60, 0.9);
+            color: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -158,8 +221,14 @@
             <img src="img/Marwadi_University_logo.png" alt="Marwadi University Logo">
             <div class="project-name">Marwadi StudySpace</div>
         </div>
+
+        <?php if ($showerror): ?>
+            <div class="error-alert">
+                <?php echo $showerror; ?>
+            </div>
+        <?php endif; ?>
         
-        <form action="#" method="POST">
+        <form action="" method="POST">
             <div class="form-group">
                 <label for="enrollment">Enrollment no</label>
                 <input 
@@ -187,4 +256,3 @@
     </div>
 </body>
 </html>
-

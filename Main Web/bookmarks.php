@@ -1,4 +1,25 @@
-<?php include 'header.php'; ?>
+<?php 
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: user_login.php");
+    exit;
+}
+
+include "config/_dbconnect.php";
+
+$user_id = $_SESSION['user_id'];
+
+// Fetch all bookmarked questions for this user
+$sql = "SELECT d.* FROM `doubts` d 
+        INNER JOIN `bookmarks` b ON d.doubt_id = b.doubt_id 
+        WHERE b.user_id = '$user_id' 
+        ORDER BY b.bookmark_id DESC";
+$bookmarks_result = mysqli_query($conn, $sql);
+
+include 'header.php'; 
+?>
 
 <style>
     .main-layout {
@@ -57,6 +78,29 @@
         margin: 0 auto;
         min-height: calc(100vh - 80px);
         flex: 1;
+    }
+
+    .back-button {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .back-button:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
     }
 
     .page-title {
@@ -149,22 +193,28 @@
 
     <div class="content-wrapper">
         <div class="main-content">
+            <a href="Dashboard.php" class="back-button">← Back</a>
+            
             <h1 class="page-title">My Bookmarks</h1>
-            <div class="bookmarks-grid" id="bookmarksGrid">
-                <div class="empty-state">
-                    <h2>No bookmarks yet</h2>
-                    <p>Bookmark questions you find helpful to access them later</p>
-                </div>
+            
+            <div class="bookmarks-grid">
+                <?php if (mysqli_num_rows($bookmarks_result) > 0): ?>
+                    <?php while ($bookmark = mysqli_fetch_assoc($bookmarks_result)): ?>
+                    <div class="bookmark-box" onclick="window.location.href='chats.php?id=<?php echo $bookmark['doubt_id']; ?>'">
+                        <h3><?php echo htmlspecialchars($bookmark['title']); ?></h3>
+                        <p><?php echo htmlspecialchars($bookmark['description']); ?></p>
+                    </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <h2>No bookmarks yet</h2>
+                        <p>Bookmark questions you find helpful to access them later</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // This will be populated dynamically from database
-    // For now, showing empty state
-    // You can add bookmarked items here when implementing backend
-</script>
 
 </body>
 </html>
